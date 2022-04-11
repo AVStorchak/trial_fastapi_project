@@ -1,6 +1,9 @@
-from fastapi import Depends, FastAPI, HTTPException, Request
+import aiofiles
+import os
+
+from fastapi import Depends, FastAPI, HTTPException, Request, File, UploadFile
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
@@ -95,3 +98,29 @@ async def read_items(request: Request, page_id: int = 1, page_size: int = 5, db:
     items = crud.get_items(db, skip=skip, limit=limit)
     result = [(item.title, item.description) for item in items]
     return templates.TemplateResponse("index.html", {"request": request, "result": result})
+
+
+@app.post("/upload-file/")
+async def upload_file(file: UploadFile = File(...)):
+    file_location = f"files/{file.filename}"
+    async with aiofiles.open(file_location, 'wb+') as f:
+        content = await file.read()
+        await f.write(content)
+
+    return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+
+'''
+@app.post("/upload-file/")
+async def create_upload_file(uploaded_file: UploadFile = File(...)):
+    file_location = f"files/{uploaded_file.filename}"
+    with open(file_location, "wb+") as file_object:
+        shutil.copyfileobj(uploaded_file.file, file_object)
+    return {"info": f"file '{uploaded_file.filename}' saved at '{file_location}'"}
+'''
+
+
+@app.get("/download-file/{filename}")
+async def download_file(filename: str):
+    file_location = os.path.join(os.path.dirname(os.path.dirname(__file__)), f"files/{filename}")
+    #file_location = f"files/{filename}"
+    return FileResponse (file_location, filename=filename)

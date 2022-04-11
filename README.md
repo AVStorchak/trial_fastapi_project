@@ -2,7 +2,7 @@
 A FastAPI project created for learning purposes
 Required software:
 
-Git, Poetry
+Git, Poetry, RabbitMQ (installation instructions: https://www.rabbitmq.com/install-debian.html)
 
 How to use:
 
