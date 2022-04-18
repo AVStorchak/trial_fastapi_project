@@ -8,7 +8,7 @@ class PikaClient:
     def __init__(self, process_callable):
         self.publish_queue_name = 'publish_queue'
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='rabbitmq')
+            pika.ConnectionParameters(host='localhost')
         )
         self.channel = self.connection.channel()
         self.publish_queue = self.channel.queue_declare(queue=self.publish_queue_name)
@@ -19,7 +19,7 @@ class PikaClient:
 
     async def consume(self, loop):
         """Setup message listener with the current running loop"""
-        connection = await connect_robust(host='rabbitmq',
+        connection = await connect_robust(host='localhost',
                                           port=5672,
                                           loop=loop)
         channel = await connection.channel()
