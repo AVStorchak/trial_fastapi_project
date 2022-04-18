@@ -1,3 +1,5 @@
+"""A standalone file for testing RabbitMQ functionality"""
+
 import pika, sys, os
 
 

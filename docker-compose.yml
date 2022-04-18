@@ -1,0 +1,26 @@
+version: "3"
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  rabbitmq:
+    image: 'bitnami/rabbitmq:latest'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - app-tier
+  myapp:
+    build: .
+    ports:
+        - "8000:8000"
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-tier

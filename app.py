@@ -1,11 +1,15 @@
 import asyncio
+
 from fastapi import FastAPI
 
-from .pika_client import PikaClient
-from .router import router
+
+from celery_app import celery_main
+from sql_app import sql_main
+from rabbit_app.pika_client import PikaClient
+from rabbit_app.router import router as rabbit_router
 
 
-class QueueApp(FastAPI):
+class ComplexApp(FastAPI):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -17,8 +21,12 @@ class QueueApp(FastAPI):
         print('Here we got incoming message %s', message)
 
 
-app = QueueApp()
-app.include_router(router)
+app = ComplexApp()
+
+
+app.include_router(celery_main.router)
+app.include_router(rabbit_router)
+app.include_router(sql_main.router)
 
 
 @app.on_event('startup')
@@ -26,3 +34,8 @@ async def startup():
     loop = asyncio.get_running_loop()
     task = loop.create_task(app.pika_client.consume(loop))
     await task
+
+
+@app.get("/")
+async def root():
+    return {"message": "Modular FastAPI application launched!"}

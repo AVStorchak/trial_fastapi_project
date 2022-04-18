@@ -9,7 +9,12 @@ celery_log = get_task_logger(__name__)
 
 
 @celery.task
-async def upload_file(uploaded_file):
+async def upload_file(uploaded_file: object) -> object:
+    """
+    Uploads files to the server.
+    :param uploaded_file: file to be uploaded
+    :return: completion status
+    """
     file_location = f"files/{uploaded_file.filename}"
     async with aiofiles.open(file_location, 'wb+') as f:
         while content := await uploaded_file.read(1024):

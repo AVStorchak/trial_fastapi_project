@@ -10,4 +10,4 @@ Clone the App repository: git clone https://github.com/AVStorchak/trial_fastapi_
 
 Enter the created directory:
     - run poetry install
-    - run uvicorn sql_app.main:app --reload
+    - run uvicorn app:app --reload

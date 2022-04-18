@@ -1,4 +1,6 @@
-import pika, os
+"""A standalone file for testing RabbitMQ functionality"""
+
+import pika
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -8,4 +10,3 @@ channel.basic_publish(exchange='',
                       body='Hello World!')
 print(" [x] Sent 'Hello World!'")
 connection.close()
-print(os.environ.get("VAR1"))

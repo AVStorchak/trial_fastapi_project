@@ -1,7 +1,7 @@
 import aiofiles
 import os
 
-from fastapi import Depends, FastAPI, HTTPException, Request, File, UploadFile
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, File, UploadFile
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse
 from sqlalchemy.orm import Session
@@ -11,7 +11,7 @@ from .database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+router = APIRouter(prefix="/database", tags=['sql app'])
 
 templates = Jinja2Templates(directory="templates")
 
@@ -27,7 +27,7 @@ def get_db():
         db.close()
 
 
-@app.post("/users/", response_model=schemas.User)
+@router.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     """
     Creates a new user
@@ -41,7 +41,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-@app.get("/users/", response_model=list[schemas.User])
+@router.get("/users/", response_model=list[schemas.User])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Fetches list of users from the database
@@ -54,7 +54,7 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return users
 
 
-@app.get("/users/{user_id}", response_model=schemas.User)
+@router.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):
     """
     Fetches a user with a list of items created by this user
@@ -68,7 +68,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@app.post("/users/{user_id}/items/", response_model=schemas.Item)
+@router.post("/users/{user_id}/items/", response_model=schemas.Item)
 def create_item_for_user(
     user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
 ):
@@ -82,7 +82,7 @@ def create_item_for_user(
     return crud.create_user_item(db=db, item=item, user_id=user_id)
 
 
-@app.get("/items/", response_class=HTMLResponse)
+@router.get("/items/", response_class=HTMLResponse)
 async def read_items(request: Request, page_id: int = 1, page_size: int = 5, db: Session = Depends(get_db)):
     """
     Fetches a list of items according to the specified query range
@@ -100,7 +100,7 @@ async def read_items(request: Request, page_id: int = 1, page_size: int = 5, db:
     return templates.TemplateResponse("index.html", {"request": request, "result": result})
 
 
-@app.post("/upload-file/")
+@router.post("/upload-file/")
 async def upload_file(file: UploadFile = File(...)):
     file_location = f"files/{file.filename}"
     async with aiofiles.open(file_location, 'wb+') as f:
@@ -110,7 +110,7 @@ async def upload_file(file: UploadFile = File(...)):
     return {"info": f"file '{file.filename}' saved at '{file_location}'"}
 
 '''
-@app.post("/upload-file/")
+@router.post("/upload-file/")
 async def create_upload_file(uploaded_file: UploadFile = File(...)):
     file_location = f"files/{uploaded_file.filename}"
     with open(file_location, "wb+") as file_object:
@@ -119,7 +119,7 @@ async def create_upload_file(uploaded_file: UploadFile = File(...)):
 '''
 
 
-@app.get("/download-file/{filename}")
+@router.get("/download-file/{filename}")
 async def download_file(filename: str):
     file_location = os.path.join(os.path.dirname(os.path.dirname(__file__)), f"files/{filename}")
     #file_location = f"files/{filename}"
