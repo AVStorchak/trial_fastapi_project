@@ -9,5 +9,7 @@ How to use:
 Clone the App repository: git clone https://github.com/AVStorchak/trial_fastapi_project
 
 Enter the created directory:
+
     - run poetry install
+
     - run uvicorn app:app --reload
