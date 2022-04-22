@@ -12,12 +12,29 @@ services:
       - '15672:15672'
     networks:
       - app-tier
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 5s
+      timeout: 10s
+      retries: 3
   myapp:
     build: .
     ports:
         - "8000:8000"
     environment:
-      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+      AMQP_HOST: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-tier
+  consumer:
+    build:
+      context: ./rabbit_consumer
+      dockerfile: Dockerfile
+    environment:
+      AMQP_HOST: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
     links:
       - rabbitmq
     depends_on:

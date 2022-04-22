@@ -13,3 +13,5 @@ Enter the created directory:
     - run poetry install
 
     - run uvicorn app:app --reload
+
+    - run python rabbit_consumer/consumer.py in a separate terminal to launch rabbit consumer
