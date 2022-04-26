@@ -1,36 +1,28 @@
 version: "3"
 
-networks:
-  app-tier:
-    driver: bridge
-
 services:
   rabbitmq:
-    image: 'bitnami/rabbitmq:latest'
+    image: 'rabbitmq:3.8.27-management-alpine'
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=rabbit
     ports:
       - '5672:5672'
       - '15672:15672'
-    networks:
-      - app-tier
-    healthcheck:
-      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
-      interval: 5s
-      timeout: 10s
-      retries: 3
+
   myapp:
     build: .
     image: myimage
     command: uvicorn app:app --reload --workers 1 --host 0.0.0.0 --port 8000
     ports:
         - "8000:8000"
-    environment:
-      AMQP_HOST: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
     links:
       - rabbitmq
     depends_on:
       - rabbitmq
-    networks:
-      - app-tier
+
   consumer:
     build:
       context: ./rabbit_consumer
@@ -41,5 +33,4 @@ services:
       - rabbitmq
     depends_on:
       - rabbitmq
-    networks:
-      - app-tier
+    restart: always
