@@ -31,7 +31,8 @@ services:
       context: ./rabbit_consumer
       dockerfile: Dockerfile
     environment:
-      AMQP_HOST: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+      - AMQP_HOST=rabbitmq
+      - QUEUE_NAME=hello
     links:
       - rabbitmq
     depends_on:
