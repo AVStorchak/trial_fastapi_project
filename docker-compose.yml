@@ -22,6 +22,9 @@ services:
       - rabbitmq
     depends_on:
       - rabbitmq
+    environment:
+      - AMQP_HOST=rabbitmq
+      - QUEUE_NAME=hello
 
   consumer:
     build:
