@@ -6,7 +6,7 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/rabbit", tags=["rabbit producer"])
 # host = os.environ.get("AMQP_HOST")
 # queue = os.environ.get("QUEUE_NAME")
-host = "localhost"
+host = "rabbitmq"
 queue = "hello"
 
 
